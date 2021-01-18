@@ -7,3 +7,6 @@ Les données recueillies par les différents capteurs peuvent être visualisées
 
 Le résultat dans le cas de l'humidité est le suivant:    
 ![dashboard_hum](assets/humidity_dashboard.png)
+
+## Circuits
+
