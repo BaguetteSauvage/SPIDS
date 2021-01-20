@@ -9,7 +9,7 @@ Le résultat dans le cas de l'humidité est le suivant:
 ![dashboard_hum](assets/humidity_dashboard.png)
 
 ## Notifications
-Un système de notifications automatisés est implémenté sur `Node-RED`. Il permet d'informer en temps réel l'utilisateur des variations de l'environnement de sa plante. 
+Un système de notifications automatisés est implémenté sur `Node-RED`. Il permet d'informer en temps réel l'utilisateur des variations de l'environnement de sa plante via sa messagerie électronique. 
 ![notification](assets/notification.png)    
 ![emails](assets/mails.png)
 
