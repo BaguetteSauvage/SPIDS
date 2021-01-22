@@ -23,6 +23,9 @@ int start =0;
 float current_hum;
 float current_temp;
 
+int led_pin = 9;
+int led_state = 0;
+
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
@@ -36,7 +39,7 @@ float get_hum (){
     digitalWrite(OUT_PIN, HIGH);
     int val = analogRead(IN_PIN);
     digitalWrite(OUT_PIN, LOW);
-     pinMode(IN_PIN, OUTPUT);
+    pinMode(IN_PIN, OUTPUT);
     float  capacitance = (float)val * IN_CAP_TO_GND / (float)(MAX_ADC_VALUE - val);
     if (capacitance < 110){
       return (0);
@@ -48,6 +51,8 @@ float get_hum (){
    if( 134 <=capacitance<=143){
     return (capacitance-89)/0.6;
    }
+   pinMode(led_pin, OUTPUT);
+
 }
 
 void update_array_temp() {
@@ -96,6 +101,7 @@ void setup(void)
     hum_array[i] = current_hum;
     temp_array[i] = current_temp;
   }
+  pinMode(led_pin, OUTPUT);
 }
 void loop()
 {
@@ -112,4 +118,13 @@ void loop()
     Serial.print(current_hum);
     Serial.println("}");
   }
-}
+  if (Serial.available()){
+    String msg_code = Serial.readString();
+    if (msg_code = "11"){
+      led_state = 1 - led_state;
+        digitalWrite(led_pin, led_state);
+        }
+      Serial.println(led_state);
+      Serial.println(msg_code);
+      }
+    }
