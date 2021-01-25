@@ -4,7 +4,7 @@
 /* Créer un objet Servo pour contrôler le servomoteur */ 
 Servo monServomoteur; 
 
-int etat = 0; // 0 for inactive, the motor doesn't run; 1 for active, the motor turns 
+int etat = 1; // 0 for inactive, the motor doesn't run; 1 for active, the motor turns 
 
 // the button to command our servo-motor
 int button = 2; 
