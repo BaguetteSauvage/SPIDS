@@ -1,13 +1,17 @@
-int sensorPin = A5;
+const int hum_pin = A5;
+const int lux_pin=A0;
+const int temp_pin=A2;
+
 int sensorValue = 0;
-long int dt = 2000;
+
 const int N = 100 ;
-long int last_display;
-long int current_time;
+float lux_array[N];
 float temp_array[N];
 float moisture_array[N];
+
 int start =0;
 int s = 0;
+
 float current_moisture;
 float current_temp;
 float current_lux;
@@ -15,12 +19,13 @@ float voltage;
 float reading;
 float lux;
 
-
+long int dt = 1000;
+long int last_display;
+long int current_time;
 /////////////////////////////////////////////////
 //   Lux                                       //
 /////////////////////////////////////////////////
-const int SensorPin=A0;
-float lux_array[N];
+
 /////////////////////////////////////////////////
 //   Fin lux                                   // 
 /////////////////////////////////////////////////
@@ -51,39 +56,39 @@ void echoCheck() {
       previous_distance = sonar.ping_result / US_ROUNDTRIP_CM; 
       mouvement = true;
       
-      Serial.print("Mouvement : ");
+/*      Serial.print("Mouvement : ");
       Serial.print(mouvement);
       Serial.print("           Ping (cm): ");
-      Serial.println(sonar.ping_result/US_ROUNDTRIP_CM);    
+      Serial.println(sonar.ping_result/US_ROUNDTRIP_CM);    */
     }
     else{
       mouvement = false; 
-      Serial.print("Mouvement : ");
+/*      Serial.print("Mouvement : ");
       Serial.print(mouvement);
-      Serial.print("           Ping (cm): ");
       Serial.println(sonar.ping_result/US_ROUNDTRIP_CM);     
+      Serial.print("           Ping (cm): ");*/
     }
   }
-}
+  }
 /////////////////////////////////////////////////
 //            end mouvmeent                    //
 /////////////////////////////////////////////////
 
 float get_temp () {
-  reading = analogRead(A2);
+  reading = analogRead(temp_pin);
   //reading = analogRead(A2);
   voltage = (reading * 5.0)/1024.0;
   return ((voltage-0.5)*100);
 }
 
 float get_moisture (){
-    sensorValue = analogRead(sensorPin);
-    //sensorValue = analogRead(sensorPin);
+    sensorValue = analogRead(hum_pin);
+    //sensorValue = analogRead(hum_pin);
     return (sensorValue);
 }
 
 float get_lux (){
-    lux = analogRead(SensorPin)*0.5279+2.386;
+    lux = analogRead(lux_pin)*0.5279+2.386;
     return (lux);
 }
 
@@ -180,9 +185,11 @@ void loop()
     Serial.print(current_temp);
     Serial.print(",\"Moisture\":");
     Serial.print(current_moisture);
-    Serial.println("}");    
+//    Serial.println("}");    
     Serial.print(",\"Lux\":");
     Serial.print(current_lux);
+    Serial.print(",\"Mouvement\":");
+    Serial.print(mouvement);
     Serial.println("}");
   }
     
