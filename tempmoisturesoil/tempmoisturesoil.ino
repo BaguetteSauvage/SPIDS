@@ -1,6 +1,6 @@
-int sensorPin = A0;
+int sensorPin = A5;
 int sensorValue = 0;
-long int dt = 1000;
+long int dt = 2000;
 const int N = 100 ;
 long int last_display;
 long int current_time;
@@ -15,12 +15,14 @@ float reading;
 
 float get_temp () {
   reading = analogRead(A2);
+  //reading = analogRead(A2);
   voltage = (reading * 5.0)/1024.0;
   return ((voltage-0.5)*100);
 }
 
 float get_moisture (){
     sensorValue = analogRead(sensorPin);
+    //sensorValue = analogRead(sensorPin);
     return (sensorValue);
 }
 
@@ -74,6 +76,7 @@ void setup(void)
 void loop()
 {
   update_array_moisture();
+  delay(10);
   update_array_temp();
   current_time = millis();
   if (current_time - last_display > dt) {
