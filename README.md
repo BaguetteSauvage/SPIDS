@@ -20,7 +20,7 @@ Les capteurs soint à brancher comme ceci :
 ![photo](assets/montage_capteurs.jpg)
 
 Voici un schéma du montage : 
-![schéma](assets/capteurs_schema.png)
+![schéma](assets/capteurs_schema.PNG)
 n.b.: le capteur d'hygrométrie n'étant pas disponible sur le logiciel de visualisation, nous l'avons remplacé par un capteur infrarouge (3 pins, un cercle au milieu)
 
 
