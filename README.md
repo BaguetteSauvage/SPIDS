@@ -17,5 +17,11 @@ Un système de notifications automatisés est implémenté sur `Node-RED`. Il pe
 
 ## Circuits
 Les capteurs soint à brancher comme ceci :
-![branchements](assets/montage_capteurs.jpg)
+![photo](assets/montage_capteurs.jpg)
+
+Voici un schéma du montage : 
+![schéma](assets/capteurs_schema.png)
+n.b.: le capteur d'hygrométrie n'étant pas disponible sur le logiciel de visualisation, nous l'avons remplacé par un capteur infrarouge (3 pins, un cercle au milieu)
+
+
 
