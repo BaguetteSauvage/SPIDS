@@ -16,4 +16,6 @@ Un système de notifications automatisés est implémenté sur `Node-RED`. Il pe
 
 
 ## Circuits
+Les capteurs soint à brancher comme ceci :
+![branchements](assets/montage_capteurs.jpg)
 
