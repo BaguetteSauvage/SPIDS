@@ -35,5 +35,9 @@ Pour commander les actionneurs reliés à la carte `Arduino Uno` depuis la carrt
 | Luminosité maximale    | 04   |
 | Actionner la pompe     | 05   |
 | Actionner le chauffage | 06   |
+| Humidité minimale      | 07   |
+| Changer mode pompe     | 08   |
+| Changer mode chauffage | 09   |
+| Changer période pompe  | 10   |
 
 
