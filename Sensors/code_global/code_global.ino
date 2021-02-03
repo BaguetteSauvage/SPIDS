@@ -1,13 +1,23 @@
 const int hum_pin = A5;
 const int lux_pin=A0;
 const int temp_pin=A2;
+const int pin_pump=4; //digital pin 4 to command the water pump
+
 
 int sensorValue = 0;
-
 const int N = 100 ;
 float lux_array[N];
 float temp_array[N];
 float moisture_array[N];
+
+////// the pump control //////////
+bool auto_pump = true; // by default, the pump is controlled automatically. We can also set a mode in which the pump is not used automatically and water will be pumped only if button pressed 
+long unsigned int delta_pump = 10 * 60000; // how long should we wait before watering the plant once more (in ms)
+long int  last_pump =  -delta_pump; //the last time plants were watered. The initial value being 0, the hygrometry value will hhave timle to stabilise 
+int time_pump = 1000; //how long should we pump each time (ms)
+int lim_hygro = 300; // the inferior limit of acceptable hygrometry of soil 
+//////
+
 
 int start =0;
 int s = 0;
@@ -23,12 +33,15 @@ long int dt = 1000;
 long int last_display;
 long int current_time;
 /////////////////////////////////////////////////
-//   Lux                                       //
+//              Lux                            //
 /////////////////////////////////////////////////
 
 /////////////////////////////////////////////////
 //   Fin lux                                   // 
 /////////////////////////////////////////////////
+
+
+
 /////////////////////////////////////////////////
 //   What is done in this script : we try to   //
 // detect the mouvement in front of the sensor //
@@ -73,6 +86,33 @@ void echoCheck() {
 /////////////////////////////////////////////////
 //            end mouvmeent                    //
 /////////////////////////////////////////////////
+/////////////////////////////////////////////////
+//            pumping strategy                 //
+/////////////////////////////////////////////////
+/*
+Given the fact that the pump has a very important water flow, 
+and the fact that the moisture sensor won't be directly under the pipe, 
+we adopt the folowing strategy :
+if (at some point the grass is to dry, we pump water for .5 seconds. Then we wait 10 minutes. 
+And 10 minutes later, we check again if the soil is too dry etc. 
+*/
+
+void pump(){
+  /*When this function is called, the water pump flows for 500 ms */
+  digitalWrite(pin_pump, 0);
+  digitalWrite(pin_pump, 1);
+  Serial.println("pump on");
+  delay(time_pump); 
+  digitalWrite(pin_pump, 0);  
+  Serial.println("pump off");
+  last_pump = millis();
+}
+
+
+/////////////////////////////////////////////////
+//              end pumping                    //
+/////////////////////////////////////////////////
+
 
 float get_temp () {
   reading = analogRead(temp_pin);
@@ -142,7 +182,7 @@ float get_avged_lux () {
 
 void setup(void)
 {
-  
+  pinMode(pin_pump, OUTPUT);  // for the pump
   Serial.begin(9600);
   current_time = millis();
   last_display = current_time;
@@ -192,7 +232,25 @@ void loop()
     Serial.print(mouvement);
     Serial.println("}");
   }
+
+  //to pump or not to pump, that is the question
+  if ((current_moisture < lim_hygro) and auto_pump){
+    // if the pump is in auto mode and the soil is too dry 
+    if (millis()-last_pump>= delta_pump){
+      // if it has been more than delta_pump since the last pumping event 
+      pump();
+    }
+  }
+
     
+  if (Serial.available()){
+    String msg_code = Serial.readString();
+    Serial.print(msg_code);
+    if (msg_code == "water"){
+      Serial.println("here");
+      pump();
+    }
+  }
   // Notice how there's no delays in this sketch to allow you to do other processing in-line while doing distance pings.
   if (millis() >= pingTimer) {   // pingSpeed milliseconds since last ping, do another ping.
     pingTimer += pingSpeed;      // Set the next ping time.
