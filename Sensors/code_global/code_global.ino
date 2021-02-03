@@ -11,7 +11,9 @@ float temp_array[N];
 float moisture_array[N];
 
 ////// the pump control //////////
-bool auto_pump = true; // by default, the pump is controlled automatically. We can also set a mode in which the pump is not used automatically and water will be pumped only if button pressed 
+int auto_pump = 1; 
+// by default, the pump is controlled automatically (1). We can also set a mode in which the pump is not used automatically and water will be pumped only if button pressed 
+/**/
 long unsigned int delta_pump = 10 * 60000; // how long should we wait before watering the plant once more (in ms)
 long int  last_pump =  -delta_pump; //the last time plants were watered. The initial value being 0, the hygrometry value will hhave timle to stabilise 
 int time_pump = 1000; //how long should we pump each time (ms)
@@ -242,14 +244,32 @@ void loop()
     }
   }
 
-    
+  // to change the parameters of the arduino 
+
   if (Serial.available()){
     String msg_code = Serial.readString();
-    Serial.print(msg_code);
-    if (msg_code == "water"){
-      Serial.println("here");
+    //extract the information
+    String id = msg_code.substring(0,2);
+    String info = msg_code.substring(2);
+
+    // to see the conrrespondance between the code and the action to do, chek the git 
+    
+    //////////////////////////////////////////
+    ///////// the pump's parametrers /////////
+    //////////////////////////////////////////
+    //force watering
+    if (id == "05"){
       pump();
     }
+    //change the mode 
+    else if (id == "08"){   
+
+    }
+
+    
+    //////////////////////////////////////////
+    ///////// end pump's parametrers /////////
+    //////////////////////////////////////////
   }
   // Notice how there's no delays in this sketch to allow you to do other processing in-line while doing distance pings.
   if (millis() >= pingTimer) {   // pingSpeed milliseconds since last ping, do another ping.
