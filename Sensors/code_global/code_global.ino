@@ -3,6 +3,10 @@ const int lux_pin=A0;
 const int temp_pin=A2;
 const int pin_pump=4; //digital pin 4 to command the water pump
 
+//time in the Arduino, can be changed 
+int heures = 0; //par défaut, 0
+int minutes = 0; // par défaut, 0
+int secondes = 0; //par défaut,0 
 
 int sensorValue = 0;
 const int N = 100 ;
@@ -18,7 +22,7 @@ by default, the pump is controlled automatically. We can change the mode :
 1 : automatic with hygrometrie 
 2 : automatic cyclic 
 */
-int period_pump = 1; // in hours 
+
 long unsigned int delta_pump = 10 * 60000; // how long should we wait before watering the plant once more (in ms)
 long int last_pump =  -delta_pump; //the last time plants were watered. The initial value being 0, the hygrometry value will hhave timle to stabilise 
 int time_pump = 1000; //how long should we pump each time (ms)
@@ -100,7 +104,7 @@ void echoCheck() {
 Given the fact that the pump has a very important water flow, 
 and the fact that the moisture sensor won't be directly under the pipe, 
 we adopt the folowing strategy :
-if (at some point the grass is to dry, we pump water for .5 seconds. Then we wait 10 minutes. 
+if (at some point the grass is to dry, we pump water for 1 second. Then we wait 10 minutes. 
 And 10 minutes later, we check again if the soil is too dry etc. 
 */
 
@@ -187,6 +191,37 @@ float get_avged_lux () {
   return (acc / N);
 }
 
+void add_heure(){
+  if (heures == 23){
+    heures = 0;
+  }
+  else{
+    heures = heures + 1;
+  };
+}
+
+void add_min(){
+  // modifie la varaible minutes 
+  if (minutes == 59){
+    minutes = 0; 
+    add_heure();
+  }
+  else{
+    minutes = minutes + 1;
+  }
+}
+
+void add_sec(){
+  // renvoie heures, minutes, secondes
+  if (secondes == 59){
+    secondes = 0; 
+    add_min();
+  }
+  else{
+    secondes = secondes + 1;
+  }
+}
+
 void setup(void)
 {
   pinMode(pin_pump, OUTPUT);  // for the pump
@@ -240,10 +275,15 @@ void loop()
     Serial.println("}");
   }
 
+  // change hour 
+  if (millis()/1000 - secondes - 60* minutes - 60*60*heures >= 0){
+    // c'est à dire si un nombre entier de seconde s'est écoulé depuis le début
+    add_sec();
+  }
   //to pump or not to pump, that is the question
   if (auto_pump == 0){/*you don't do anything herebecause you are in full manual mode*/}
   else if (auto_pump == 1){
-    if ((current_moisture < lim_hygro)){
+    if ((current_moisture < lim_hygro) and (heures>8) and (heures<22)){
       // if the pump is in auto mode and the soil is too dry 
       if (millis()-last_pump>= delta_pump){
         // if it has been more than delta_pump since the last pumping event 
@@ -251,13 +291,7 @@ void loop()
       }
     }
   }
-  else if(auto_pump == 2){
-    if ((millis()/1000 - last_pump)/60 >= period_pump * 60){
-      // we compare the numbers in seconds 
-      last_pump = millis()/1000; //in seconds 
-      pump();
-    }
-  }
+  else if(auto_pump == 2){/* don't do anything, instructions are sent by NodeRed itself via the SerialPort*/  }
 
   // to change the parameters of the arduino 
   if (Serial.available()){
@@ -291,14 +325,12 @@ void loop()
     else if (id == "07"){
       lim_hygro = info.toInt();
     }
-    //change the period of the cylce
-    else if (id == "10"){
-      period_pump = info.toInt(); //reminder, this is the period in hours 
-    }
     
     //////////////////////////////////////////
     ///////// end pump's parametrers /////////
     //////////////////////////////////////////
+
+
   }
   // Notice how there's no delays in this sketch to allow you to do other processing in-line while doing distance pings.
   if (millis() >= pingTimer) {   // pingSpeed milliseconds since last ping, do another ping.

@@ -38,7 +38,7 @@ Pour commander les actionneurs reliés à la carte `Arduino Uno` depuis la carrt
 | Humidité minimale      | 07   |transparent	|
 | Changer mode pompe     | 08   |0000 if full manual, 0001 if hygrometric, 0002 if cyclic	|
 | Changer mode chauffage | 09   ||
-| Changer période pompe  | 10   |new period in hours |
+| Changer heure| 10   |hhmm (tant pis pour les secondes)|
 
 
 
