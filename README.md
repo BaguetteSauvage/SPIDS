@@ -39,5 +39,7 @@ Pour commander les actionneurs reliés à la carte `Arduino Uno` depuis la carrt
 | Changer mode pompe     | 08   |
 | Changer mode chauffage | 09   |
 | Changer période pompe  | 10   |
+| Changer heure 	 | 11   |
+
 
 

@@ -12,10 +12,15 @@ float moisture_array[N];
 
 ////// the pump control //////////
 int auto_pump = 1; 
-// by default, the pump is controlled automatically (1). We can also set a mode in which the pump is not used automatically and water will be pumped only if button pressed 
-/**/
+/*  
+by default, the pump is controlled automatically. We can change the mode :
+0 : entirely manual 
+1 : automatic with hygrometrie 
+2 : automatic cyclic 
+*/
+int period_pump = 1; // in hours 
 long unsigned int delta_pump = 10 * 60000; // how long should we wait before watering the plant once more (in ms)
-long int  last_pump =  -delta_pump; //the last time plants were watered. The initial value being 0, the hygrometry value will hhave timle to stabilise 
+long int last_pump =  -delta_pump; //the last time plants were watered. The initial value being 0, the hygrometry value will hhave timle to stabilise 
 int time_pump = 1000; //how long should we pump each time (ms)
 int lim_hygro = 300; // the inferior limit of acceptable hygrometry of soil 
 //////
@@ -56,11 +61,11 @@ long int current_time;
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
-unsigned int pingSpeed = 1000; // How frequently are we going to send out a ping (in milliseconds). 50ms would be 20 times a second.
+unsigned int pingSpeed = 1000; // How frequently are we going to send out a ping (in milliseconds).
 unsigned long pingTimer;     // Holds the next ping time.
 unsigned int tolerance = 10 ;  // The tolerance in the variation of distance mesured by the sensor
 unsigned int previous_distance; //the last ditance recorded y the sensor, should be in cm
-bool mouvement = true; // when we plug the greenhouse, we image hat someone is next to it... 
+bool mouvement = true; // when we plug the greenhouse, we imagine hat someone is next to it... 
 
 
 void echoCheck() { 
@@ -236,23 +241,32 @@ void loop()
   }
 
   //to pump or not to pump, that is the question
-  if ((current_moisture < lim_hygro) and auto_pump){
-    // if the pump is in auto mode and the soil is too dry 
-    if (millis()-last_pump>= delta_pump){
-      // if it has been more than delta_pump since the last pumping event 
+  if (auto_pump == 0){/*you don't do anything herebecause you are in full manual mode*/}
+  else if (auto_pump == 1){
+    if ((current_moisture < lim_hygro)){
+      // if the pump is in auto mode and the soil is too dry 
+      if (millis()-last_pump>= delta_pump){
+        // if it has been more than delta_pump since the last pumping event 
+        pump();
+      }
+    }
+  }
+  else if(auto_pump == 2){
+    if ((millis()/1000 - last_pump)/60 >= period_pump * 60){
+      // we compare the numbers in seconds 
+      last_pump = millis()/1000; //in seconds 
       pump();
     }
   }
 
   // to change the parameters of the arduino 
-
   if (Serial.available()){
     String msg_code = Serial.readString();
     //extract the information
     String id = msg_code.substring(0,2);
     String info = msg_code.substring(2);
 
-    // to see the conrrespondance between the code and the action to do, chek the git 
+    // to see the correspondance between the code and the action to do, chek the git 
     
     //////////////////////////////////////////
     ///////// the pump's parametrers /////////
@@ -263,9 +277,24 @@ void loop()
     }
     //change the mode 
     else if (id == "08"){   
-
+      if (info == "0000"){ //full manual
+        auto_pump = 0;
+      }      
+      else if (info == "0001"){ //automatic and hygro
+        auto_pump = 1 ;
+      }      
+      else if (info == "0002"){ //automatic cylcic 
+        auto_pump = 2;
+      }      
     }
-
+    //change the minimum hygrometry 
+    else if (id == "07"){
+      lim_hygro = info.toInt();
+    }
+    //change the period of the cylce
+    else if (id == "10"){
+      period_pump = info.toInt(); //reminder, this is the period in hours 
+    }
     
     //////////////////////////////////////////
     ///////// end pump's parametrers /////////
