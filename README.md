@@ -25,11 +25,15 @@ n.b.: le capteur d'hygrométrie n'étant pas disponible sur le logiciel de visua
 
 ## Circuits
 
-| Température minimale | 01 |   |   |   |
-|----------------------|----|---|---|---|
-| Température minimale | 02 |   |   |   |
-| Humidité minimale    | 03 |   |   |   |
-| Humidité maximale    | 04 |   |   |   |
+Pour commander les actionneurs reliés à la carte `Arduino Uno` depuis la carrte `RaspberryPi` un système de messages codés est utilisé. Chaque message est composé de 6 chiffres, les deux premiers permettent d'identifier la commande et les 4 suivants la valeur associée. Par exemple: `"010018"` a pour code "01" ce qui permet dde régler la température minimale et la valeur est "0018" ce qui correspond à 18°C. 
 
+| Commande               | Code |
+|------------------------|------|
+| Température minimale   | 01   |
+| Température maximale   | 02   |
+| Luminosité minimale    | 03   |
+| Luminosité maximale    | 04   |
+| Actionner la pompe     | 05   |
+| Actionner le chauffage | 06   |
 
 
