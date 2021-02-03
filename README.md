@@ -23,5 +23,13 @@ Voici un schéma du montage :
 ![schéma](assets/capteurs_schema.PNG)
 n.b.: le capteur d'hygrométrie n'étant pas disponible sur le logiciel de visualisation, nous l'avons remplacé par un capteur infrarouge (3 pins, un cercle au milieu)
 
+## Circuits
+
+| Température minimale | 01 |   |   |   |
+|----------------------|----|---|---|---|
+| Température minimale | 02 |   |   |   |
+| Humidité minimale    | 03 |   |   |   |
+| Humidité maximale    | 04 |   |   |   |
+
 
 
