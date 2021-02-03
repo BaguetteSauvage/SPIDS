@@ -1,9 +1,0 @@
-//////// The role of previous_distance //////////
-How is it changed at every loop : 
-1/ If the is a significant (ie more than "tolerance" between previous_distance and the new mesured) 
-change in the mesured distance, we completely change previous_distance 
-and switch it to the newx mesured distance. 
-Then we switch the value of mouvement = True
-
-2/ If there is little variation :  => Mouvement = False 
-We don't change the value of previous_distance 
