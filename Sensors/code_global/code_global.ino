@@ -321,10 +321,12 @@ void loop()
         auto_pump = 2;
       }      
     }
+
     //change the minimum hygrometry 
     else if (id == "07"){
       lim_hygro = info.toInt();
     }
+
 
     //change time_pump
     else if (id == "11"){ 
@@ -338,8 +340,7 @@ void loop()
     // change the hour of the arduino
     else if (id == "10"){      
       heures = (info.substring(0,2)).toInt();
-      minutes = (info.substring(2)).toInt();    
-
+      minutes = (info.substring(2)).toInt();   
     }
 
 
