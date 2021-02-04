@@ -5,6 +5,10 @@ const int pin_pump=4; //digital pin 4 to command the water pump
 const int pin_heater=8; //digital pin 8 to command the heater
 
 
+//time in the Arduino, can be changed 
+int heures = 0; //par défaut, 0
+int minutes = 0; // par défaut, 0
+int secondes = 0; //par défaut,0 
 
 int sensorValue = 0;
 const int N = 100 ;
@@ -13,9 +17,16 @@ float temp_array[N];
 float moisture_array[N];
 
 ////// the pump control //////////
-bool auto_pump = true; // by default, the pump is controlled automatically. We can also set a mode in which the pump is not used automatically and water will be pumped only if button pressed 
+int auto_pump = 1; 
+/*  
+by default, the pump is controlled automatically. We can change the mode :
+0 : entirely manual 
+1 : automatic with hygrometrie 
+2 : automatic cyclic 
+*/
+
 long unsigned int delta_pump = 10 * 60000; // how long should we wait before watering the plant once more (in ms)
-long int  last_pump =  -delta_pump; //the last time plants were watered. The initial value being 0, the hygrometry value will hhave timle to stabilise 
+long int last_pump =  -delta_pump; //the last time plants were watered. The initial value being 0, the hygrometry value will hhave timle to stabilise 
 int time_pump = 1000; //how long should we pump each time (ms)
 int lim_hygro = 300; // the inferior limit of acceptable hygrometry of soil 
 //////
@@ -59,11 +70,17 @@ long int current_time;
 
 //NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
-unsigned int pingSpeed = 1000; // How frequently are we going to send out a ping (in milliseconds). 50ms would be 20 times a second.
+unsigned int pingSpeed = 1000; // How frequently are we going to send out a ping (in milliseconds).
 unsigned long pingTimer;     // Holds the next ping time.
 unsigned int tolerance = 10 ;  // The tolerance in the variation of distance mesured by the sensor
 unsigned int previous_distance; //the last ditance recorded y the sensor, should be in cm
+<<<<<<< HEAD
 bool mouvement = true; // when we plug the greenhouse, we image hat someone is next to it... 
+=======
+bool mouvement = true; // when we plug the greenhouse, we imagine hat someone is next to it... 
+
+
+>>>>>>> ae6622c0b9826f0fd0abfb2dcb778b0decd59804
 void echoCheck() { 
   if (sonar.check_timer()) { // This is how you check to see if the ping was received.
     // Here's where you can add code.
@@ -98,7 +115,7 @@ void echoCheck() {
 Given the fact that the pump has a very important water flow, 
 and the fact that the moisture sensor won't be directly under the pipe, 
 we adopt the folowing strategy :
-if (at some point the grass is to dry, we pump water for .5 seconds. Then we wait 10 minutes. 
+if (at some point the grass is to dry, we pump water for 1 second. Then we wait 10 minutes. 
 And 10 minutes later, we check again if the soil is too dry etc. 
 */
 
@@ -185,6 +202,7 @@ float get_avged_lux () {
   return (acc / N);
 }
 
+<<<<<<< HEAD
 /////////////////////////////////////////////////
 /////////// Functions for the Heater/////////////
 /////////////////////////////////////////////////
@@ -222,6 +240,38 @@ void heater_auto(float MIN,float MAX){
 /////////////////////////////////////////////////
 ////////End code Functions for the Heater////////
 /////////////////////////////////////////////////
+=======
+void add_heure(){
+  if (heures == 23){
+    heures = 0;
+  }
+  else{
+    heures = heures + 1;
+  };
+}
+
+void add_min(){
+  // modifie la varaible minutes 
+  if (minutes == 59){
+    minutes = 0; 
+    add_heure();
+  }
+  else{
+    minutes = minutes + 1;
+  }
+}
+
+void add_sec(){
+  // renvoie heures, minutes, secondes
+  if (secondes == 59){
+    secondes = 0; 
+    add_min();
+  }
+  else{
+    secondes = secondes + 1;
+  }
+}
+>>>>>>> ae6622c0b9826f0fd0abfb2dcb778b0decd59804
 
 void setup(void)
 {
@@ -282,23 +332,74 @@ void loop()
     Serial.println("}");
   }
 
+  // change hour 
+  if (millis()/1000 - secondes - 60* minutes - 60*60*heures >= 0){
+    // c'est à dire si un nombre entier de seconde s'est écoulé depuis le début
+    add_sec();
+  }
   //to pump or not to pump, that is the question
-  if ((current_moisture < lim_hygro) and auto_pump){
-    // if the pump is in auto mode and the soil is too dry 
-    if (millis()-last_pump>= delta_pump){
-      // if it has been more than delta_pump since the last pumping event 
-      pump();
+  if (auto_pump == 0){/*you don't do anything herebecause you are in full manual mode*/}
+  else if (auto_pump == 1){
+    if ((current_moisture < lim_hygro) and (heures>8) and (heures<22)){
+      // if the pump is in auto mode and the soil is too dry 
+      if (millis()-last_pump>= delta_pump){
+        // if it has been more than delta_pump since the last pumping event 
+        pump();
+      }
     }
   }
+  else if(auto_pump == 2){/* don't do anything, instructions are sent by NodeRed itself via the SerialPort*/  }
 
-    
+  // to change the parameters of the arduino 
   if (Serial.available()){
     String msg_code = Serial.readString();
-    Serial.print(msg_code);
-    if (msg_code == "water"){
-      Serial.println("here");
+    //extract the information
+    String id = msg_code.substring(0,2);
+    String info = msg_code.substring(2);
+
+    // to see the correspondance between the code and the action to do, chek the git 
+    
+    //////////////////////////////////////////
+    ///////// the pump's parametrers /////////
+    //////////////////////////////////////////
+    //force watering
+    if (id == "05"){
       pump();
     }
+    //change the mode 
+    else if (id == "08"){   
+      if (info == "0000"){ //full manual
+        auto_pump = 0;
+      }      
+      else if (info == "0001"){ //automatic and hygro
+        auto_pump = 1 ;
+      }      
+      else if (info == "0002"){ //automatic cylcic 
+        auto_pump = 2;
+      }      
+    }
+    //change the minimum hygrometry 
+    else if (id == "07"){
+      lim_hygro = info.toInt();
+    }
+
+    //change time_pump
+    else if (id == "11"){ 
+      time_pump = info.toInt();
+    }
+    
+    //////////////////////////////////////////
+    ///////// end pump's parametrers /////////
+    //////////////////////////////////////////
+
+    // change the hour of the arduino
+    else if (id == "10"){      
+      heures = (info.substring(0,2)).toInt();
+      minutes = (info.substring(2)).toInt();    
+
+    }
+
+
   }
   // Notice how there's no delays in this sketch to allow you to do other processing in-line while doing distance pings.
   if (millis() >= pingTimer) {   // pingSpeed milliseconds since last ping, do another ping.

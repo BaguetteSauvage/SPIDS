@@ -27,17 +27,18 @@ n.b.: le capteur d'hygrométrie n'étant pas disponible sur le logiciel de visua
 
 Pour commander les actionneurs reliés à la carte `Arduino Uno` depuis la carrte `RaspberryPi` un système de messages codés est utilisé. Chaque message est composé de 6 chiffres, les deux premiers permettent d'identifier la commande et les 4 suivants la valeur associée. Par exemple: `"010018"` a pour code "01" ce qui permet dde régler la température minimale et la valeur est "0018" ce qui correspond à 18°C. 
 
-| Commande               | Code |
-|------------------------|------|
-| Température minimale   | 01   |
-| Température maximale   | 02   |
-| Luminosité minimale    | 03   |
-| Luminosité maximale    | 04   |
-| Actionner la pompe     | 05   |
-| Actionner le chauffage | 06   |
-| Humidité minimale      | 07   |
-| Changer mode pompe     | 08   |
-| Changer mode chauffage | 09   |
-| Changer période pompe  | 10   |
+| Commande               | Code | Info  |
+|------------------------|------|-------|
+| Température minimale   | 01   |transparent	|
+| Température maximale   | 02   |transparent	|
+| Luminosité minimale    | 03   |transparent	|
+| Luminosité maximale    | 04   |transparent	|
+| Actionner la pompe     | 05   |transparent	|
+| Actionner le chauffage | 06   |transparent	|
+| Humidité minimale      | 07   |transparent	|
+| Changer mode pompe     | 08   |0000 if full manual, 0001 if hygrometric, 0002 if cyclic	|
+| Changer mode chauffage | 09   ||
+| Changer heure| 10   |hhmm (tant pis pour les secondes)|
+
 
 
