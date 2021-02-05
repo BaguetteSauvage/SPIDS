@@ -197,11 +197,11 @@ float get_avged_lux () {
 void heater_manual(){
   int state_Heater = digitalRead(pin_heater);
   
-  if (state_Heater = 0){
+  if (state_Heater == 0){
     digitalWrite(pin_heater, HIGH);
     Serial.println("Heater activated manually");
     }
-  else if (state_Heater = 1){
+  else if (state_Heater == 1){
     digitalWrite(pin_heater, LOW);
     Serial.println("Heater desactivated manually");
     }
@@ -259,7 +259,7 @@ void add_sec(){
 void setup(void){
   pinMode(pin_pump, OUTPUT);  // for the pump
   pinMode(pin_heater, OUTPUT); // heater
-  digitalWrite(pin_heater,LOW);
+  /*digitalWrite(pin_heater,LOW);*/
   Serial.begin(9600);
   
   current_time = millis();
@@ -339,6 +339,34 @@ void loop()
     String id = msg_code.substring(0,2);
     String info = msg_code.substring(2);
 
+    ///// START CODE FOR THE HEATER/////////
+      
+    //MANUAL
+    if(id == "06"){
+      //id=06 Turn on/off the Heater manually
+      heater_manual();     
+    }
+
+
+    //AUTO
+    else if (id=="09"){
+      //id=09 change the Heater to mode automatically
+      //T_min and T_max are set by default      
+      heater_auto(MinT,MaxT);              
+      }
+
+    else if(id=="01"){
+      float T_min = info.toFloat();
+      heater_auto(T_min,MaxT);
+      }
+    else if(id=="02"){
+      float T_max = info.toFloat();
+      heater_auto(MinT,T_max);
+      }
+ 
+    ///// END CODE FOR THE HEATER/////////
+
+    
     // to see the correspondance between the code and the action to do, chek the git 
     
     //////////////////////////////////////////
@@ -389,40 +417,6 @@ void loop()
     pingTimer += pingSpeed;      // Set the next ping time.
     sonar.ping_timer(echoCheck); // Send out the ping, calls "echoCheck" function every 24uS where you can check the ping status.
     // allumer l'écran ici
-  }
-
-  ///// START CODE FOR THE HEATER/////////
-  
-  if (Serial.available()){
-    String msg_code = Serial.readString();
-    String id = msg_code.substring(0,2); //extract the information
-    String info = msg_code.substring(2);
-     
-    //MANUAL
-      if(id == "06"){
-        //id=06 Turn on/off the Heater manually
-        heater_manual();     
-      }
-
-
-     //AUTO
-      if (id=="09"){
-        //id=09 change the Heater to mode automatically
-        //T_min and T_max are set by default
-
-        
-        heater_auto(MinT,MaxT);              
-        }
-      if(id=="01"){
-        float T_min = info.toFloat();
-        heater_auto(T_min,MaxT);
-        }
-      if(id=="02"){
-        float T_max = info.toFloat();
-        heater_auto(MinT,T_max);
-        }
-   }
- 
-  ///// END CODE FOR THE HEATER/////////
+  } 
   
 }
