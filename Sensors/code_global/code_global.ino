@@ -68,19 +68,15 @@ long int current_time;
 #define ECHO_PIN     12  // Arduino pin tied to echo pin on ping sensor.
 #define MAX_DISTANCE 400 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
-//NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
 unsigned int pingSpeed = 1000; // How frequently are we going to send out a ping (in milliseconds).
 unsigned long pingTimer;     // Holds the next ping time.
 unsigned int tolerance = 10 ;  // The tolerance in the variation of distance mesured by the sensor
 unsigned int previous_distance; //the last ditance recorded y the sensor, should be in cm
-<<<<<<< HEAD
-bool mouvement = true; // when we plug the greenhouse, we image hat someone is next to it... 
-=======
 bool mouvement = true; // when we plug the greenhouse, we imagine hat someone is next to it... 
 
 
->>>>>>> ae6622c0b9826f0fd0abfb2dcb778b0decd59804
 void echoCheck() { 
   if (sonar.check_timer()) { // This is how you check to see if the ping was received.
     // Here's where you can add code.
@@ -88,18 +84,9 @@ void echoCheck() {
       // this means there is significant change in the distance 
       previous_distance = sonar.ping_result / US_ROUNDTRIP_CM; 
       mouvement = true;
-      
-/*      Serial.print("Mouvement : ");
-      Serial.print(mouvement);
-      Serial.print("           Ping (cm): ");
-      Serial.println(sonar.ping_result/US_ROUNDTRIP_CM);    */
     }
     else{
       mouvement = false; 
-/*    Serial.print("Mouvement : ");
-      Serial.print(mouvement);
-      Serial.println(sonar.ping_result/US_ROUNDTRIP_CM);     
-      Serial.print("           Ping (cm): ");*/
     }
   }
   }
@@ -201,8 +188,6 @@ float get_avged_lux () {
   }
   return (acc / N);
 }
-
-<<<<<<< HEAD
 /////////////////////////////////////////////////
 /////////// Functions for the Heater/////////////
 /////////////////////////////////////////////////
@@ -229,20 +214,19 @@ void heater_auto(float MIN,float MAX){
  
   if(Temperature<MIN){
     digitalWrite(pin_heater,HIGH);
-    Serial.println("Switched on Heater (Mode Auto)"}
+    Serial.println("Switched on Heater (Mode Auto)");
     }
    else if(Temperature>MAX){
     digitalWrite(pin_heater,LOW);
-    Serial.println("Switched off Heater (Mode Auto)"}   
+    Serial.println("Switched off Heater (Mode Auto)");
     }
   }
 
 /////////////////////////////////////////////////
 ////////End code Functions for the Heater////////
 /////////////////////////////////////////////////
-=======
 void add_heure(){
-  if (heures == 23){
+  if(heures == 24){
     heures = 0;
   }
   else{
@@ -271,10 +255,8 @@ void add_sec(){
     secondes = secondes + 1;
   }
 }
->>>>>>> ae6622c0b9826f0fd0abfb2dcb778b0decd59804
 
-void setup(void)
-{
+void setup(void){
   pinMode(pin_pump, OUTPUT);  // for the pump
   pinMode(pin_heater, OUTPUT); // heater
   digitalWrite(pin_heater,LOW);
