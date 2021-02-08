@@ -40,7 +40,7 @@ Pour commander les actionneurs reliés à la carte `Arduino Uno` depuis la carrt
 | Changer mode chauffage | 09   |		|
 | Changer heure		 | 10   |hhmm (tant pis pour les secondes)|
 | Changer time_pump	 | 11 	| en (ms)|
-| Changer etat de lampe  | 12   |0 pour éteindre la lampe, 1 pour allumer la lampe|
+| Changer etat de lampe  | 12   |0000 light off, 1111 light on|
 
 
 
