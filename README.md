@@ -39,6 +39,7 @@ Pour commander les actionneurs reliés à la carte `Arduino Uno` depuis la carrt
 | Changer mode pompe     | 08   |0000 if full manual, 0001 if hygrometric, 0002 if cyclic	|
 | Changer mode chauffage | 09   ||
 | Changer heure| 10   |hhmm (tant pis pour les secondes)|
+| Changer time_pump | 11 | en (ms)|
 
 
 
