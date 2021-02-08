@@ -31,15 +31,16 @@ Pour commander les actionneurs reliés à la carte `Arduino Uno` depuis la carrt
 |------------------------|------|-------|
 | Température minimale   | 01   |transparent	|
 | Température maximale   | 02   |transparent	|
-| Luminosité minimale    | 03   |transparent	|
-| Luminosité maximale    | 04   |transparent	|
+| Heure coucher 	 | 03   |hhmm 		|
+| Heure lever 		 | 04   |hhmm		|
 | Actionner la pompe     | 05   |transparent	|
 | Actionner le chauffage | 06   |transparent	|
 | Humidité minimale      | 07   |transparent	|
 | Changer mode pompe     | 08   |0000 if full manual, 0001 if hygrometric, 0002 if cyclic	|
-| Changer mode chauffage | 09   ||
-| Changer heure| 10   |hhmm (tant pis pour les secondes)|
-| Changer time_pump | 11 | en (ms)|
+| Changer mode chauffage | 09   |		|
+| Changer heure		 | 10   |hhmm (tant pis pour les secondes)|
+| Changer time_pump	 | 11 	| en (ms)|
+| Changer etat de lampe  | 12   |0 pour éteindre la lampe, 1 pour allumer la lampe|
 
 
 
