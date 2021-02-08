@@ -23,6 +23,8 @@ int m_morning;
 int h_night;
 int m_night;
 
+// pump state
+bool pump_state = 0; // 0 if not functionning, 1 if functionning
 
 ////// the pump control //////////
 int auto_pump = 1; 
@@ -121,22 +123,6 @@ we adopt the folowing strategy :
 if (at some point the grass is to dry, we pump water for 1 second. Then we wait 10 minutes. 
 And 10 minutes later, we check again if the soil is too dry etc. 
 */
-
-void pump(){
-  /*When this function is called, the water pump flows for 500 ms */
-  digitalWrite(pin_pump, 0);
-  digitalWrite(pin_pump, 1);
-  Serial.println("pump on");
-  delay(time_pump); 
-  digitalWrite(pin_pump, 0);  
-  Serial.println("pump off");
-  last_pump = millis();
-}
-
-
-/////////////////////////////////////////////////
-//              end pumping                    //
-/////////////////////////////////////////////////
 
 
 float get_temp () {
@@ -316,13 +302,25 @@ void loop()
     if ((current_moisture < lim_hygro) and allowed()){
       // if the pump is in auto mode and the soil is too dry 
       if ((millis()-last_pump>= delta_pump) or (millis()-last_pump<=0)){
-        // if it has been more than delta_pump since the last pumping event 
-        pump();
+        // if it has been more than delta_pump since the last pumping event (or millis() overflowed)
+        last_pump = millis();           
+        digitalWrite(pin_pump, 0);
+        digitalWrite(pin_pump, 1);
+        pump_state = 1;
+        Serial.println("pump on");
+        // pump will be set off after time_pump
       }
     }
   }
   else if(auto_pump == 2){/* don't do anything, instructions are sent by NodeRed itself via the SerialPort*/  }
 
+  //to turn off the pump
+  if(((millis() - last_pump > time_pump) or (millis()<0)) and (pump_state)){
+    // it means that we have been pumping for more than time_pump
+    digitalWrite(pin_pump, 0);
+    pump_state = 0;
+    Serial.println("pump off");    
+  }
   // to change the parameters of the arduino, communbication with node red 
   if (Serial.available()){
     String msg_code = Serial.readString();
@@ -348,7 +346,6 @@ void loop()
       //T_min and T_max are set by default      
       heater_auto(MinT,MaxT);              
       }
-
     else if(id=="01"){
       float T_min = info.toFloat();
       heater_auto(T_min,MaxT);
@@ -366,7 +363,12 @@ void loop()
     //////////////////////////////////////////
     //force watering
     else if (id == "05"){
-      pump();
+      last_pump = millis();           
+      digitalWrite(pin_pump, 0);
+      digitalWrite(pin_pump, 1);
+      pump_state = 1;
+      Serial.println("pump on");
+      // pump will be set off after time_pump
     }
     //change the mode 
     else if (id == "08"){   
