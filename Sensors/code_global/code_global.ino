@@ -1,14 +1,11 @@
+/// the pins used 
 const int hum_pin = A5;
 const int lux_pin=A0;
 const int temp_pin=A2;
 const int pin_pump=4; //digital pin 4 to command the water pump
 const int pin_heater=8; //digital pin 8 to command the heater
-
-
-//time in the Arduino, can be changed 
-int heures = 0; //par défaut, 0
-int minutes = 0; // par défaut, 0
-int secondes = 0; //par défaut,0 
+const int pin_light = 10; // digital pin 10 to command the relay, to command the light 
+//carefull, pin 12 is used by the distance (=> mouvement) detector
 
 int sensorValue = 0;
 const int N = 100 ;
@@ -16,21 +13,30 @@ float lux_array[N];
 float temp_array[N];
 float moisture_array[N];
 
+// what time is it ?
+int heures;
+int minutes; 
+
+// Sleepy time 
+int h_morning;
+int m_morning;
+int h_night;
+int m_night;
+
+
 ////// the pump control //////////
 int auto_pump = 1; 
 /*  
-by default, the pump is controlled automatically. We can change the mode :
+by default, the pump is controlled automatically. We can change the mode by changing the value of auto_pump :
 0 : entirely manual 
 1 : automatic with hygrometrie 
 2 : automatic cyclic 
 */
-
 long unsigned int delta_pump = 10 * 60000; // how long should we wait before watering the plant once more (in ms)
-long int last_pump =  -delta_pump; //the last time plants were watered. The initial value being 0, the hygrometry value will hhave timle to stabilise 
+long int last_pump =  0; //the last time plants were watered. The initial value being 0, the hygrometry value will hhave timle to stabilise 
 int time_pump = 1000; //how long should we pump each time (ms)
 int lim_hygro = 300; // the inferior limit of acceptable hygrometry of soil 
 //////
-
 
 int start =0;
 int s = 0;
@@ -48,13 +54,6 @@ float MaxT=25;
 long int dt = 1000;
 long int last_display;
 long int current_time;
-/////////////////////////////////////////////////
-//              Lux                            //
-/////////////////////////////////////////////////
-
-/////////////////////////////////////////////////
-//   Fin lux                                   // 
-/////////////////////////////////////////////////
 
 
 
@@ -94,6 +93,23 @@ void echoCheck() {
 //            end mouvmeent                    //
 /////////////////////////////////////////////////
 
+
+/////////////////////////////////////////////////
+////// Are you allowed to pump ? /////////////////
+/////////////////////////////////////////////////
+
+bool allowed(){
+  if((heures == h_morning) or (heures == h_night)){
+    if (heures == h_morning){return (minutes>=m_morning);}  
+    else {return (minutes<=m_night);}  
+  }
+  else if ((heures > h_morning) and (heures < h_night)){return true;}
+  else{return false;}
+}
+
+/////////////////////////////////////////////////
+////////// End allowed to pump ? /////////////////
+/////////////////////////////////////////////////
 
 /////////////////////////////////////////////////
 //            pumping strategy                 //
@@ -225,41 +241,11 @@ void heater_auto(float MIN,float MAX){
 /////////////////////////////////////////////////
 ////////End code Functions for the Heater////////
 /////////////////////////////////////////////////
-void add_heure(){
-  if(heures == 24){
-    heures = 0;
-  }
-  else{
-    heures = heures + 1;
-  };
-}
-
-void add_min(){
-  // modifie la varaible minutes 
-  if (minutes == 59){
-    minutes = 0; 
-    add_heure();
-  }
-  else{
-    minutes = minutes + 1;
-  }
-}
-
-void add_sec(){
-  // renvoie heures, minutes, secondes
-  if (secondes == 59){
-    secondes = 0; 
-    add_min();
-  }
-  else{
-    secondes = secondes + 1;
-  }
-}
-
-void setup(void){
+void setup(){
   pinMode(pin_pump, OUTPUT);  // for the pump
   pinMode(pin_heater, OUTPUT); // heater
-  /*digitalWrite(pin_heater,LOW);*/
+  pinMode(pin_light, OUTPUT); //the light
+  digitalWrite(pin_light,LOW);
   Serial.begin(9600);
   
   current_time = millis();
@@ -273,10 +259,6 @@ void setup(void){
   }
   for (int a = 0; a < N; a++) {
     temp_array[a] = current_temp;
-  }
-
-  for (int b = 0; b < N; b++) {
-    temp_array[b] = current_temp;
   }
 
   //for the mouvmeent 
@@ -296,8 +278,22 @@ void loop()
   update_array_temp();
   delay(10);
   update_array_lux();
+
+  /*
+  >>>>>>>>>>>>>>> About the use of millis <<<<<<<<<<<<<<<<<
+  After a certain amount of time, millis() will overflow. Therefore, our test won't be correct because our last values (such as last_display).
+  Therefore, because we only use millis() in this kind of context : 
+    > last_watever = millis()
+    > if (millis() - last_watever > delta_watever){do something; usually including the previous line;}
+  So we can say that : 
+    > we add the condition (millis()-last_watever < 0) to the previous one, 
+    therefore, when millis overflows, the condition is quite automatically fulfilled. The good point of that is that it will change the last_watever to a correct value
+    The bad point is that we enter in the loop even if is has been less than delta_watever since previous_watever (for example, we will send the report of informations too eraly). 
+    But we will accept this since it does not cause major disturbance. 
+  */ 
+ 
   current_time = millis();
-  if (current_time - last_display > dt) {
+  if ((current_time - last_display > dt) or (current_time - last_display < 0)){
     last_display = current_time;
     current_temp = get_avged_temp();
     current_moisture = get_avged_moisture();
@@ -314,17 +310,12 @@ void loop()
     Serial.println("}");
   }
 
-  // change hour 
-  if (millis()/1000 - secondes - 60* minutes - 60*60*heures >= 0){
-    // c'est à dire si un nombre entier de seconde s'est écoulé depuis le début
-    add_sec();
-  }
   //to pump or not to pump, that is the question
-  if (auto_pump == 0){/*you don't do anything herebecause you are in full manual mode*/}
+  if (auto_pump == 0){/*you don't do anything here because you are in full manual mode*/}
   else if (auto_pump == 1){
-    if ((current_moisture < lim_hygro) and (heures>8) and (heures<22)){
+    if ((current_moisture < lim_hygro) and allowed()){
       // if the pump is in auto mode and the soil is too dry 
-      if (millis()-last_pump>= delta_pump){
+      if ((millis()-last_pump>= delta_pump) or (millis()-last_pump<=0)){
         // if it has been more than delta_pump since the last pumping event 
         pump();
       }
@@ -332,15 +323,18 @@ void loop()
   }
   else if(auto_pump == 2){/* don't do anything, instructions are sent by NodeRed itself via the SerialPort*/  }
 
-  // to change the parameters of the arduino 
+  // to change the parameters of the arduino, communbication with node red 
   if (Serial.available()){
     String msg_code = Serial.readString();
     //extract the information
     String id = msg_code.substring(0,2);
     String info = msg_code.substring(2);
+    
+    // to see the correspondance between the code and the action to do, check the git 
 
+    ////////////////////////////////////////
     ///// START CODE FOR THE HEATER/////////
-      
+    ////////////////////////////////////////  
     //MANUAL
     if(id == "06"){
       //id=06 Turn on/off the Heater manually
@@ -367,13 +361,11 @@ void loop()
     ///// END CODE FOR THE HEATER/////////
 
     
-    // to see the correspondance between the code and the action to do, chek the git 
-    
     //////////////////////////////////////////
     ///////// the pump's parametrers /////////
     //////////////////////////////////////////
     //force watering
-    if (id == "05"){
+    else if (id == "05"){
       pump();
     }
     //change the mode 
@@ -388,28 +380,30 @@ void loop()
         auto_pump = 2;
       }      
     }
-
     //change the minimum hygrometry 
     else if (id == "07"){
       lim_hygro = info.toInt();
     }
-
-
     //change time_pump
     else if (id == "11"){ 
       time_pump = info.toInt();
-    }
-    
+    }    
     //////////////////////////////////////////
     ///////// end pump's parametrers /////////
     //////////////////////////////////////////
 
-    // change the hour of the arduino
-    else if (id == "10"){      
+    // change current time (should receive a message like this one about every minute) 
+    else if (id == "10"){            
       heures = (info.substring(0,2)).toInt();
       minutes = (info.substring(2)).toInt();   
     }
 
+
+    // the lamp control
+    else if (id == "12"){
+      if (info == "0000"){digitalWrite(pin_light, LOW);} 
+      else if (info == "1111") {digitalWrite(pin_light, HIGH);}      
+    }
 
   }
   // Notice how there's no delays in this sketch to allow you to do other processing in-line while doing distance pings.
@@ -417,6 +411,5 @@ void loop()
     pingTimer += pingSpeed;      // Set the next ping time.
     sonar.ping_timer(echoCheck); // Send out the ping, calls "echoCheck" function every 24uS where you can check the ping status.
     // allumer l'écran ici
-  } 
-  
+  }   
 }
