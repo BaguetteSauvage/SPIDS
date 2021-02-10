@@ -90,6 +90,7 @@ void echoCheck() {
       mouvement = false; 
     }
   }
+  else{mouvement = false;};
   }
 /////////////////////////////////////////////////
 //            end mouvmeent                    //
@@ -139,7 +140,7 @@ float get_moisture (){
 }
 
 float get_lux (){
-    lux = analogRead(lux_pin)*0.5279+2.386;
+    lux = (analogRead(lux_pin)*0.5279+2.386)*5-80;
     return lux;
 }
 
@@ -408,8 +409,8 @@ void loop()
 
   }
   // Notice how there's no delays in this sketch to allow you to do other processing in-line while doing distance pings.
-  if ((millis() - pingTimer >= pingSpeed) or (millis() - pingTimer <= 0)) {   // pingSpeed milliseconds since last ping, do another ping.
-    pingTimer = millis();
+ if ((millis() - pingTimer >= pingSpeed) or (millis() - pingTimer <= 0)) {   // pingSpeed milliseconds since last ping, do another ping.   
+    pingTimer = millis();   
     sonar.ping_timer(echoCheck); // Send out the ping, calls "echoCheck", you can check the ping status, where echoChek is defined before
-  }   
+ }
 }
