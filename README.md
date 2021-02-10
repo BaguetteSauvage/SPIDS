@@ -23,6 +23,8 @@ Voici un schéma du montage :
 ![schéma](assets/capteurs_schema.PNG)
 n.b.: le capteur d'hygrométrie n'étant pas disponible sur le logiciel de visualisation, nous l'avons remplacé par un capteur infrarouge (3 pins, un cercle au milieu)
 
+Le lien vers le schéma, Tinkercad : https://www.tinkercad.com/things/bAPoRXGjClL-copy-of-montage-ids/editel?sharecode=ed_YTJ0ywndT22aBq9hvQLNpsKSYZYKvbhE34J7VrUU
+
 ## Circuits
 
 Pour commander les actionneurs reliés à la carte `Arduino Uno` depuis la carrte `RaspberryPi` un système de messages codés est utilisé. Chaque message est composé de 6 chiffres, les deux premiers permettent d'identifier la commande et les 4 suivants la valeur associée. Par exemple: `"010018"` a pour code "01" ce qui permet dde régler la température minimale et la valeur est "0018" ce qui correspond à 18°C. 
@@ -37,9 +39,9 @@ Pour commander les actionneurs reliés à la carte `Arduino Uno` depuis la carrt
 | Actionner le chauffage | 06   |transparent	|
 | Humidité minimale      | 07   |transparent	|
 | Changer mode pompe     | 08   |0000 if full manual, 0001 if hygrometric, 0002 if cyclic	|
-| Changer mode chauffage | 09   |		|
+| Changer mode chauffage | 09   |0000 heater off, 1111 heater on|
 | Changer heure		 | 10   |hhmm (tant pis pour les secondes)|
-| Changer time_pump	 | 11 	| en (ms)|
+| Changer time_pump	 | 11 	|en (ms)	|
 | Changer etat de lampe  | 12   |0000 light off, 1111 light on|
 
 
