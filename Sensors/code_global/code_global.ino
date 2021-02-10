@@ -403,8 +403,8 @@ void loop()
 
     // the lamp control
     else if (id == "12"){
-      if (info == "0000"){digitalWrite(pin_light, LOW);} 
-      else if (info == "1111") {digitalWrite(pin_light, HIGH);}      
+      if (info.toInt() == 0){digitalWrite(pin_light, LOW);} 
+      else if (info.toInt() == 1111) {digitalWrite(pin_light, HIGH);}      
     }
 
   }
