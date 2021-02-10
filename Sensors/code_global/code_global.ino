@@ -231,7 +231,7 @@ void setup(){
   pinMode(pin_pump, OUTPUT);  // for the pump
   pinMode(pin_heater, OUTPUT); // heater
   pinMode(pin_light, OUTPUT); //the light
-  digitalWrite(pin_light,LOW);
+  digitalWrite(pin_light,HIGH); //even if it is counter intuitive, high means lamp off, low means lamp on
   Serial.begin(9600);
   
   current_time = millis();
@@ -403,8 +403,8 @@ void loop()
 
     // the lamp control
     else if (id == "12"){
-      if (info.toInt() == 0){digitalWrite(pin_light, LOW);} 
-      else if (info.toInt() == 1111) {digitalWrite(pin_light, HIGH);}      
+      if (info.toInt() == 0){digitalWrite(pin_light, HIGH);} 
+      else if (info.toInt() == 1111) {digitalWrite(pin_light, LOW);}      
     }
 
   }
