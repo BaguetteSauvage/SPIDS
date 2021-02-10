@@ -1,3 +1,5 @@
+#include <NewPing.h>
+
 /// the pins used 
 const int hum_pin = A5;
 const int lux_pin=A0;
@@ -5,7 +7,7 @@ const int temp_pin=A2;
 const int pin_pump=4; //digital pin 4 to command the water pump
 const int pin_heater=8; //digital pin 8 to command the heater
 const int pin_light = 10; // digital pin 10 to command the relay, to command the light 
-//carefull, pin 12 is used by the distance (=> mouvement) detector
+//carefull, pin 12 is used by the distance (=> mouvement) detector, see infra 
 
 int sensorValue = 0;
 const int N = 100 ;
@@ -35,7 +37,7 @@ by default, the pump is controlled automatically. We can change the mode by chan
 2 : automatic cyclic 
 */
 long unsigned int delta_pump = 10 * 60000; // how long should we wait before watering the plant once more (in ms)
-long int last_pump =  0; //the last time plants were watered. The initial value being 0, the hygrometry value will hhave timle to stabilise 
+long unsigned int last_pump =  0; //the last time plants were watered. The initial value being 0, the hygrometry value will hhave timle to stabilise 
 int time_pump = 1000; //how long should we pump each time (ms)
 int lim_hygro = 300; // the inferior limit of acceptable hygrometry of soil 
 //////
@@ -53,9 +55,9 @@ float lux;
 float MinT=16;
 float MaxT=25;
 
-long int dt = 1000;
-long int last_display;
-long int current_time;
+// to send information to the raspbery 
+const int dt = 1000;
+long unsigned int last_display;
 
 
 
@@ -63,7 +65,6 @@ long int current_time;
 //   What is done in this script : we try to   //
 // detect the mouvement in front of the sensor //
 /////////////////////////////////////////////////
-#include <NewPing.h>
 
 #define TRIGGER_PIN  12  // Arduino pin tied to trigger pin on ping sensor.
 #define ECHO_PIN     12  // Arduino pin tied to echo pin on ping sensor.
@@ -71,16 +72,15 @@ long int current_time;
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
-unsigned int pingSpeed = 1000; // How frequently are we going to send out a ping (in milliseconds).
-unsigned long pingTimer;     // Holds the next ping time.
-unsigned int tolerance = 10 ;  // The tolerance in the variation of distance mesured by the sensor
+const unsigned int pingSpeed = 1000; // How frequently are we going to send out a ping (in milliseconds).
+unsigned long pingTimer;     // Holds the previous ping time.
+const unsigned int tolerance = 10 ;  // The tolerance in the variation of distance mesured by the sensor
 unsigned int previous_distance; //the last ditance recorded y the sensor, should be in cm
 bool mouvement = true; // when we plug the greenhouse, we imagine hat someone is next to it... 
 
 
 void echoCheck() { 
   if (sonar.check_timer()) { // This is how you check to see if the ping was received.
-    // Here's where you can add code.
     if (abs(previous_distance - sonar.ping_result/US_ROUNDTRIP_CM) > tolerance){
       // this means there is significant change in the distance 
       previous_distance = sonar.ping_result / US_ROUNDTRIP_CM; 
@@ -234,8 +234,7 @@ void setup(){
   digitalWrite(pin_light,HIGH); //even if it is counter intuitive, high means lamp off, low means lamp on
   Serial.begin(9600);
   
-  current_time = millis();
-  last_display = current_time;
+  last_display = millis();
   current_moisture = get_moisture();
   current_temp = get_temp();
   current_lux = get_lux();
@@ -276,11 +275,12 @@ void loop()
     therefore, when millis overflows, the condition is quite automatically fulfilled. The good point of that is that it will change the last_watever to a correct value
     The bad point is that we enter in the loop even if is has been less than delta_watever since previous_watever (for example, we will send the report of informations too eraly). 
     But we will accept this since it does not cause major disturbance. 
+
+    Concerning the use of millis() in detecting the distance, overflow will eventually cause a disturbance lasting maximum once evry 50 days... 
   */ 
  
-  current_time = millis();
-  if ((current_time - last_display > dt) or (current_time - last_display < 0)){
-    last_display = current_time;
+  if ((millis() - last_display > dt) or (millis() - last_display < 0)){
+    last_display = millis();
     current_temp = get_avged_temp();
     current_moisture = get_avged_moisture();
     current_lux = get_avged_lux();
@@ -315,13 +315,14 @@ void loop()
   else if(auto_pump == 2){/* don't do anything, instructions are sent by NodeRed itself via the SerialPort*/  }
 
   //to turn off the pump
-  if(((millis() - last_pump > time_pump) or (millis()<0)) and (pump_state)){
+  if(((millis() - last_pump > time_pump) or (millis() - last_pump <= 0)) and (pump_state)){
     // it means that we have been pumping for more than time_pump
     digitalWrite(pin_pump, 0);
     pump_state = 0;
     Serial.println("pump off");    
   }
-  // to change the parameters of the arduino, communbication with node red 
+
+  // to change the parameters of the arduino, communication with node red 
   if (Serial.available()){
     String msg_code = Serial.readString();
     //extract the information
@@ -338,8 +339,6 @@ void loop()
       //id=06 Turn on/off the Heater manually
       heater_manual();     
     }
-
-
     //AUTO
     else if (id=="09"){
       //id=09 change the Heater to mode automatically
@@ -409,9 +408,8 @@ void loop()
 
   }
   // Notice how there's no delays in this sketch to allow you to do other processing in-line while doing distance pings.
-  if (millis() >= pingTimer) {   // pingSpeed milliseconds since last ping, do another ping.
-    pingTimer += pingSpeed;      // Set the next ping time.
-    sonar.ping_timer(echoCheck); // Send out the ping, calls "echoCheck" function every 24uS where you can check the ping status.
-    // allumer l'écran ici
+  if ((millis() - pingTimer >= pingSpeed) or (millis() - pingTimer <= 0)) {   // pingSpeed milliseconds since last ping, do another ping.
+    pingTimer = millis();
+    sonar.ping_timer(echoCheck); // Send out the ping, calls "echoCheck", you can check the ping status, where echoChek is defined before
   }   
 }
