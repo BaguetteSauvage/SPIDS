@@ -374,33 +374,48 @@ void loop()
     else if (id == "08"){   
       if (info.toInt() == 0){ //full manual
         auto_pump = 0;
+        Serial.println("auto pump 0");
       }      
       else if (info.toInt() == 1){ //automatic and hygro
         auto_pump = 1 ;
+        Serial.println("auto pump 1");
       }      
       else if (info.toInt() == 2){ //automatic cylcic 
         auto_pump = 2;
+        Serial.println("auto pump 2");
       }      
     }
     //change the minimum hygrometry 
     else if (id == "07"){
-      lim_hygro = info.toInt();
+      Serial.println(lim_hygro);
+      lim_hygro = info.toInt();      
+      Serial.println(lim_hygro);
     }
     //change time_pump
     else if (id == "11"){ 
-      time_pump = info.toInt();
+      Serial.println(time_pump);
+      time_pump = info.toInt();      
+      Serial.println(time_pump);
     }  
 
     //change h_morning and m_morning 
     else if (id == "03"){     
+      Serial.println(h_morning);
+      Serial.println(m_morning);
       h_morning = (info.substring(0,2)).toInt();
-      m_morning = (info.substring(2)).toInt(); 
+      m_morning = (info.substring(2)).toInt();    
+      Serial.println(h_morning);
+      Serial.println(m_morning);
     }      
     
     //change h_night and m_night 
-    else if (id == "04"){     
+    else if (id == "04"){      
+      Serial.println(h_night);
+      Serial.println(m_night);  
       h_night = (info.substring(0,2)).toInt();
-      m_night = (info.substring(2)).toInt(); 
+      m_night = (info.substring(2)).toInt();  
+      Serial.println(h_night);
+      Serial.println(m_night);  
     }  
 
 
@@ -409,16 +424,22 @@ void loop()
     //////////////////////////////////////////
 
     // change current time (should receive a message like this one about every minute) 
-    else if (id == "10"){            
+    else if (id == "10"){      
+      Serial.println(heures);
+      Serial.println(minutes); 
       heures = (info.substring(0,2)).toInt();
-      minutes = (info.substring(2)).toInt();   
+      minutes = (info.substring(2)).toInt();     
+      Serial.println(heures);
+      Serial.println(minutes); 
     }
 
 
     // the lamp control
     else if (id == "12"){
-      if (info.toInt() == 0){digitalWrite(pin_light, HIGH);} 
-      else if (info.toInt() == 1111) {digitalWrite(pin_light, LOW);}      
+      if (info.toInt() == 0){digitalWrite(pin_light, HIGH);   
+      Serial.println("lamp off"); } 
+      else if (info.toInt() == 1111) {digitalWrite(pin_light, LOW);  
+      Serial.println("lamp on");}      
     }
 
   }
