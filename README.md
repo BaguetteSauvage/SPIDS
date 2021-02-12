@@ -15,12 +15,10 @@ Un système de notifications automatisés est implémenté sur `Node-RED`. Il pe
 
 
 
-## Circuits
-Les capteurs soint à brancher comme ceci :
-![photo](assets/montage_capteurs.jpg)
+## Circuit
 
 Voici un schéma du montage : 
-![schéma](assets/capteurs_schema.PNG)
+![schéma](assets/capteurs_schema_unique_plaquette.PNG)
 n.b.: le capteur d'hygrométrie n'étant pas disponible sur le logiciel de visualisation, nous l'avons remplacé par un capteur infrarouge (3 pins, un cercle au milieu)
 
 Le lien vers le schéma, Tinkercad : https://www.tinkercad.com/things/bAPoRXGjClL-copy-of-montage-ids/editel?sharecode=ed_YTJ0ywndT22aBq9hvQLNpsKSYZYKvbhE34J7VrUU
@@ -31,15 +29,15 @@ Pour commander les actionneurs reliés à la carte `Arduino Uno` depuis la carrt
 
 | Commande               | Code | Info  |
 |------------------------|------|-------|
-| Température minimale   | 01   |transparent	|
-| Température maximale   | 02   |transparent	|
+| Température minimale   | 01   |en °C 		|
+| Température maximale   | 02   |en °C		|
 | Heure coucher 	 | 03   |hhmm 		|
 | Heure lever 		 | 04   |hhmm		|
-| Actionner la pompe     | 05   |transparent	|
-| Actionner le chauffage | 06   |transparent	|
-| Humidité minimale      | 07   |transparent	|
+| Actionner la pompe     | 05   |peu importe 	|
+| Actionner le chauffage | 06   |peu importe    |
+| Humidité minimale      | 07   |une valeur entre 0000 et 1000|
 | Changer mode pompe     | 08   |0000 if full manual, 0001 if hygrometric, 0002 if cyclic	|
-| Changer mode chauffage | 09   |0000 heater off, 1111 heater on|
+| Changer mode chauffage | 09   |peu importe |
 | Changer heure		 | 10   |hhmm (tant pis pour les secondes)|
 | Changer time_pump	 | 11 	|en (ms)	|
 | Changer etat de lampe  | 12   |0000 light off, 1111 light on|
